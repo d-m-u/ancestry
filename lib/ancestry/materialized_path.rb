@@ -90,6 +90,23 @@ module Ancestry
     end
 
     module InstanceMethods
+      extend ActiveSupport::Concern
+      included do
+        #   these both work, yay. the `assert_equal model.arrange_serializable(order: "id desc"), result` fails because it contains these if they're run
+        #   attribute :foo, :string, default: "drew was here" if ActiveRecord::VERSION::STRING > '5.0.0'
+        #   attribute :foo, String.new, default: "drew was here" if ActiveRecord::VERSION::STRING < '5.0.0'
+
+        attribute :ancestor_ids, :string if ActiveRecord::VERSION::STRING > '5.0.0'
+        attribute :ancestor_ids, String.new if ActiveRecord::VERSION::STRING <= '5.0.0'
+        # it's a start, it's not quite working
+        # /Users/drewmu/ancestry/test/concerns/scopes_test.rb:103:in `test_scoping_in_callbacks' fails:
+        # ScopesTest#test_scoping_in_callbacks:
+        #         NoMethodError: undefined method `type_cast_from_database' for "":String
+        #     /Users/drewmu/.rvm/gems/ruby-2.5.5/gems/activerecord-4.2.10/lib/active_record/attribute.rb:106:in `type_cast'
+        #     /Users/drewmu/.rvm/gems/ruby-2.5.5/gems/activerecord-4.2.10/lib/active_record/attribute.rb:43:in `original_value'
+        #     /Users/drewmu/.rvm/gems/ruby-2.5.5/gems/activerecord-4.2.10/lib/active_record/attribute.rb:36:in `value'
+        #     /Users/drewmu/.rvm/gems/ruby-2.5.5/gems/activerecord-4.2.10/lib/active_record/attribute_set.rb:31:in `fetch_value'
+      end
 
       # Validates the ancestry, but can also be applied if validation is bypassed to determine if children should be affected
       def sane_ancestry?
