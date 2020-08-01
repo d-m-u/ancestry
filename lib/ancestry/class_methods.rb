@@ -13,7 +13,10 @@ module Ancestry
     def scope_depth depth_options, depth
       depth_options.inject(self.ancestry_base_class) do |scope, option|
         scope_name, relative_depth = option
-        if [:before_depth, :to_depth, :at_depth, :from_depth, :after_depth].include? scope_name
+        if [:before_depth, :from_depth, :after_depth].include? scope_name
+          scope.send scope_name, depth + relative_depth
+        elsif [:at_depth, :to_depth].include? scope_name
+          warn ":at_depth and :to_depth are deprecated and will be removed in version 3.1.0"
           scope.send scope_name, depth + relative_depth
         else
           raise Ancestry::AncestryException.new("Unknown depth option: #{scope_name}.")
